@@ -56,7 +56,10 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
-    '''This function drops the duplicates and returns a clean dataset'''
+    '''
+    Args: df
+    return: df
+    This function drops the duplicates and returns a clean dataset'''
     df = df.drop_duplicates(subset=['message'], keep=False)
     return df
 
