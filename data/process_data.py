@@ -28,9 +28,9 @@ def load_data(messages_filepath, categories_filepath):
     values need to be converted from string to nummeric'''
     
     # load messages dataset
-    messages = pd.read_csv("messages.csv")
+    messages = pd.read_csv(messages_filepath)
     # load categories dataset
-    categories = pd.read_csv("categories.csv")
+    categories = pd.read_csv(categories_filepath)
     # merge datasets
     df = pd.merge(messages,categories)
     # create a dataframe of the 36 individual category columns
@@ -69,8 +69,8 @@ def save_data(df, database_filename):
     Args: df, database filename
     return: saves the cleaned df in SQLdb
     This function '''
-    engine = create_engine('sqlite:///InsertDatabaseName.db')
-    df.to_sql('InsertTableName', engine, index=False)
+    engine = create_engine('sqlite:///'+database_filename)
+    df.to_sql('DisasterResponseDB', engine,if_exists = 'replace', index=False)
      
 
 

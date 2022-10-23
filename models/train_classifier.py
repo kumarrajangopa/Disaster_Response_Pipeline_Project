@@ -1,24 +1,89 @@
+# import libraries
 import sys
+import pandas as pd
+import pickle
+import numpy as np
+import re
+from sqlalchemy import create_engine
+import nltk
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem.wordnet import WordNetLemmatizer
+
+
+from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.multioutput import MultiOutputClassifier as clf
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+
+nltk.download(['punkt','wordnet''stopwords'])
 
 
 def load_data(database_filepath):
-    pass
+    '''
+    Args: database_filepath
+    return: Training variable(as numpy array), target variables(df), target names as list
+    This function obtain the data from the database and returns X,y and the list of y names
+    '''
+    engine = create_engine('sqlite:///'+database_filepath)
+    df = pd.read_sql("SELECT * FROM DisasterResponseDB", engine)
+    X = df.message
+    y = df.iloc[:, 4:]
+    category_names = y.columns
+    return X, y, category_names
 
 
 def tokenize(text):
-    pass
+    '''
+    Args: text
+    return: returns tokens(list)
+    text: This function takes a text, then normalize it, tokenize it, lemmatize it and returns a list containing these
+    tokens
+    '''
+    url_regex = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    detected_urls = re.findall(url_regex, text)
+    for url in detected_urls:
+        text = text.replace(url, "urlplaceholder")
+    words = word_tokenize(text)
+    tokens = [WordNetLemmatizer().lemmatize(w) for w in words if w not in stopwords.words("english")]
+    return tokens
 
 
 def build_model():
-    pass
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', clf(RandomForestClassifier()))
 
+    ])
+    parameters = {'clf__estimator__n_estimators': [10, 50, 100],
+                  'clf__estimator__min_samples_split': [2, 3]
+                  }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters)
+    #cv.fit(X_train, y_train)
+    return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    # Predicting on the test set
+    y_pred = model.predict(X_test)
 
+    # printing the classification report
+    report = classification_report(Y_test, y_pred, target_names=category_names)
+    # printing the best parameters
+    best_params = model.best_params_
+    print("\nClassification report is:", report)
+
+    # Setting the model parameters to the best parameters
 
 def save_model(model, model_filepath):
-    pass
+
+    with open(model_filepath, 'wb') as file:
+        pickle.dump(model, file)
+
 
 
 def main():
@@ -36,6 +101,8 @@ def main():
         
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
+
+        print("\nBest Parameters:", model.best_params_)
 
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
         save_model(model, model_filepath)
