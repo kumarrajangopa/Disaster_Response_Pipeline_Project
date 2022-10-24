@@ -1,6 +1,7 @@
 # Disaster Response Pipeline Project
 
 ### Instructions:
+Github link: https://github.com/kumarrajangopa/Disaster_Response_Pipeline_Project
 1. Run the following commands in the project's root directory to set up your database and model.
 
     - To run ETL pipeline that cleans data and stores in database
