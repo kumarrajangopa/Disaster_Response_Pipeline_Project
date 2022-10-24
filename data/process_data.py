@@ -49,10 +49,12 @@ def load_data(messages_filepath, categories_filepath):
     for column in categories:
         # set each value to be the last character of the string
         categories[column] = categories[column].apply(lambda x: number_part(x))
-
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
+        # converting all values other than 0 and 1 to NaN
+        categories[column] = categories[column].apply(lambda x: np.nan if x > 1 else x)
         # drop the original categories column from `df`
+    categories = categories.dropna()
     df = df.drop(columns=['categories'])
     # concatenate the original dataframe with the new `categories` dataframe
     df = df.join(categories)
