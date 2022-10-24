@@ -19,6 +19,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 nltk.download(['punkt', 'wordnet', 'stopwords'])
+nltk.download('omw-1.4')
+#error_score="raise"
 
 
 def load_data(database_filepath):
@@ -89,7 +91,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
     Y_pred = model.predict(X_test)
     for i in range(36):
         print(Y_test.columns[i], ':')
-        print(classification_report(Y_test.iloc[:, i], Y_pred[:, i], zero_divsion=0, target_names=category_names),'...............................................')
+        print(classification_report(Y_test.iloc[:, i], Y_pred[:, i], zero_division=0, labels=[0,1],target_names=category_names),'...............................................')
 
 
 def save_model(model, model_filepath):
