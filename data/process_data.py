@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine
 
+
 # use this row to extract a list of new column names for categories.
 def column_part(string):
     '''
@@ -11,6 +12,8 @@ def column_part(string):
     Takes a string and splits into two parts and returns the first part'''
     first_part = string.split('-')
     return first_part[0]
+
+
 def number_part(string):
     '''
     Args: string
@@ -19,6 +22,7 @@ def number_part(string):
     second_part = string.split('-')
     return second_part[1]
 
+
 def load_data(messages_filepath, categories_filepath):
     '''
     Args: dataset 1 filepath, dataset 2 filepath
@@ -26,15 +30,15 @@ def load_data(messages_filepath, categories_filepath):
     This function reads two csv files and returns a concatenated dataframe. 
     The categories file need to be further split into individual columns and their
     values need to be converted from string to nummeric'''
-    
+
     # load messages dataset
     messages = pd.read_csv(messages_filepath)
     # load categories dataset
     categories = pd.read_csv(categories_filepath)
     # merge datasets
-    df = pd.merge(messages,categories)
+    df = pd.merge(messages, categories)
     # create a dataframe of the 36 individual category columns
-    categories = df.categories.str.split(';',expand=True)
+    categories = df.categories.str.split(';', expand=True)
     # select the first row of the categories dataframe
     row = categories.iloc[0].values.tolist()
     # Applying a lambda function to obtain the column names
@@ -45,10 +49,10 @@ def load_data(messages_filepath, categories_filepath):
     for column in categories:
         # set each value to be the last character of the string
         categories[column] = categories[column].apply(lambda x: number_part(x))
-    
+
         # convert column from string to numeric
-        categories[column] =  pd.to_numeric(categories[column]) 
-    # drop the original categories column from `df`
+        categories[column] = pd.to_numeric(categories[column])
+        # drop the original categories column from `df`
     df = df.drop(columns=['categories'])
     # concatenate the original dataframe with the new `categories` dataframe
     df = df.join(categories)
@@ -69,9 +73,8 @@ def save_data(df, database_filename):
     Args: df, database filename
     return: saves the cleaned df in SQLdb
     This function '''
-    engine = create_engine('sqlite:///'+database_filename)
-    df.to_sql('DisasterResponseDB', engine,if_exists = 'replace', index=False)
-     
+    engine = create_engine('sqlite:///' + database_filename)
+    df.to_sql('DisasterResponse', engine, if_exists='replace', index=False)
 
 
 def main():
@@ -85,18 +88,18 @@ def main():
 
         print('Cleaning data...')
         df = clean_data(df)
-        
+        df.head()
         print('Saving data...\n    DATABASE: {}'.format(database_filepath))
         save_data(df, database_filepath)
-        
+
         print('Cleaned data saved to database!')
-    
+
     else:
-        print('Please provide the filepaths of the messages and categories '\
-              'datasets as the first and second argument respectively, as '\
-              'well as the filepath of the database to save the cleaned data '\
-              'to as the third argument. \n\nExample: python process_data.py '\
-              'disaster_messages.csv disaster_categories.csv '\
+        print('Please provide the filepaths of the messages and categories ' \
+              'datasets as the first and second argument respectively, as ' \
+              'well as the filepath of the database to save the cleaned data ' \
+              'to as the third argument. \n\nExample: python process_data.py ' \
+              'disaster_messages.csv disaster_categories.csv ' \
               'DisasterResponse.db')
 
 

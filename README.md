@@ -13,3 +13,16 @@
 3. Run your web app: `python run.py`
 
 4. Click the `PREVIEW` button to open the homepage
+
+### File Structure:
+1. app Folder:
+   1. templates folder
+   2. run.py to run the app
+2. data Folder:
+   1. categories and messages csv files
+   2. ETL database
+   3. pre-processed python file
+3. models
+   1. classification model file
+4. Notebooks
+   1. These contain the ETL and ML preparation notebooks (not needed for running the app)
